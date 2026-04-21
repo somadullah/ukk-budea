@@ -12,7 +12,7 @@ const ParticlesBackground = ({ variant = 'network' }: ParticlesBackgroundProps) 
         await loadSlim(engine);
     }, []);
 
-    const getOptions = () => {
+    const getOptions = (): ISourceOptions => {
         const baseOptions: ISourceOptions = {
             background: { color: { value: "transparent" } },
             fpsLimit: 60,
