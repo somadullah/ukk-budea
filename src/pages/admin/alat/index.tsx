@@ -9,6 +9,7 @@ interface Alat {
   kategori_id: number | null;
   nama_kategori: string;
   gambar: string;
+  harga: number;
 }
 
 interface Kategori {
@@ -27,8 +28,10 @@ export default function AlatAdmin() {
     deskripsi: '', 
     jumlah: 1, 
     kategori_id: '',
-    gambar: '/images/alat/placeholder.png'
+    gambar: '/images/alat/placeholder.png',
+    harga: 0
   });
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -60,7 +63,7 @@ export default function AlatAdmin() {
     if (res.ok) {
       setShowModal(false);
       setEditId(null);
-      setFormData({ nama_alat: '', deskripsi: '', jumlah: 1, kategori_id: '', gambar: '/images/alat/placeholder.png' });
+      setFormData({ nama_alat: '', deskripsi: '', jumlah: 1, kategori_id: '', gambar: '/images/alat/placeholder.png', harga: 0 });
       fetchData();
     } else {
       const data = await res.json();
@@ -75,7 +78,8 @@ export default function AlatAdmin() {
       deskripsi: item.deskripsi,
       jumlah: item.jumlah,
       kategori_id: item.kategori_id ? item.kategori_id.toString() : '',
-      gambar: item.gambar
+      gambar: item.gambar,
+      harga: item.harga || 0
     });
     setShowModal(true);
   };
@@ -100,8 +104,8 @@ export default function AlatAdmin() {
       </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="glass-card animate-fade-in" style={{ width: '500px', background: 'var(--bg-color)' }}>
+        <div className="modal-overlay">
+          <div className="glass-card animate-fade-in" style={{ width: '500px', background: 'var(--bg-color)', margin: 'auto' }}>
             <h3>{editId ? 'Edit Alat' : 'Tambah Alat'}</h3>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
@@ -124,6 +128,10 @@ export default function AlatAdmin() {
                 <input required type="number" min="1" className="form-input" value={formData.jumlah} onChange={e => setFormData({...formData, jumlah: parseInt(e.target.value)})} />
               </div>
               <div className="form-group">
+                <label className="form-label">Harga Satuan (Rp)</label>
+                <input required type="number" className="form-input" value={formData.harga} onChange={e => setFormData({...formData, harga: parseFloat(e.target.value) || 0})} />
+              </div>
+              <div className="form-group">
                 <label className="form-label">Deskripsi</label>
                 <textarea className="form-input" rows={2} value={formData.deskripsi} onChange={e => setFormData({...formData, deskripsi: e.target.value})}></textarea>
               </div>
@@ -138,12 +146,26 @@ export default function AlatAdmin() {
               </div>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{editId ? 'Update' : 'Simpan'}</button>
-                <button type="button" className="btn" style={{ flex: 1, background: 'var(--text-muted)', color: 'white' }} onClick={() => { setShowModal(false); setEditId(null); setFormData({ nama_alat: '', deskripsi: '', jumlah: 1, kategori_id: '', gambar: '/images/alat/placeholder.png' }); }}>Batal</button>
+                <button type="button" className="btn" style={{ flex: 1, background: 'var(--text-muted)', color: 'white' }} onClick={() => { setShowModal(false); setEditId(null); setFormData({ nama_alat: '', deskripsi: '', jumlah: 1, kategori_id: '', gambar: '/images/alat/placeholder.png', harga: 0 }); }}>Batal</button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '1rem' }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Cari alat atau kategori..." 
+            className="form-input" 
+            style={{ paddingLeft: '2.5rem', width: '100%', marginBottom: 0 }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
       <div className="table-container">
         <table>
@@ -152,6 +174,7 @@ export default function AlatAdmin() {
               <th>Gambar</th>
               <th>Nama Alat</th>
               <th>Kategori</th>
+              <th>Harga</th>
               <th>Stok</th>
               <th>Deskripsi</th>
               <th>Aksi</th>
@@ -159,11 +182,15 @@ export default function AlatAdmin() {
           </thead>
           <tbody>
             {loading ? <tr><td colSpan={6} style={{textAlign: 'center'}}>Loading...</td></tr> : 
-              alat.map(a => (
+              alat.filter(a => 
+                a.nama_alat.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                (a.nama_kategori && a.nama_kategori.toLowerCase().includes(searchTerm.toLowerCase()))
+              ).map(a => (
                 <tr key={a.id}>
                   <td><img src={a.gambar} alt={a.nama_alat} style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} /></td>
                   <td style={{ fontWeight: 500 }}>{a.nama_alat}</td>
                   <td><span style={{ padding: '2px 8px', background: 'rgba(79, 70, 229, 0.1)', color: 'var(--primary-color)', borderRadius: '12px', fontSize: '0.8rem' }}>{a.nama_kategori || 'Tanpa Kategori'}</span></td>
+                  <td style={{ fontWeight: 600 }}>Rp{a.harga ? a.harga.toLocaleString('id-ID') : '0'}</td>
                   <td>{a.jumlah}</td>
                   <td style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{a.deskripsi}</td>
                   <td>

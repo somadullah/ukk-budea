@@ -8,11 +8,15 @@ interface Peminjaman {
   tanggal_pinjam: string;
   tanggal_kembali: string;
   status: string;
+  kondisi_alat: string | null;
+  denda: number | null;
+  catatan: string | null;
 }
 
 export default function PeminjamanAdmin() {
   const [peminjaman, setPeminjaman] = useState<Peminjaman[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchPeminjaman = async () => {
     setLoading(true);
@@ -35,6 +39,20 @@ export default function PeminjamanAdmin() {
         <h2>Data Peminjaman</h2>
       </div>
 
+      <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '1rem' }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Cari peminjam atau alat..." 
+            className="form-input" 
+            style={{ paddingLeft: '2.5rem', width: '100%', marginBottom: 0 }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="table-container">
         <table>
           <thead>
@@ -42,14 +60,20 @@ export default function PeminjamanAdmin() {
               <th>ID</th>
               <th>Peminjam</th>
               <th>Alat</th>
-              <th>Tanggal Pinjam</th>
-              <th>Tanggal Kembali</th>
+              <th>Pinjam</th>
+              <th>Kembali</th>
               <th>Status</th>
+              <th>Kondisi</th>
+              <th>Denda</th>
+              <th>Catatan</th>
             </tr>
           </thead>
           <tbody>
             {loading ? <tr><td colSpan={6} style={{textAlign: 'center'}}>Loading...</td></tr> : 
-              peminjaman.map(p => (
+              peminjaman.filter(p => 
+                p.peminjam.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                p.nama_alat.toLowerCase().includes(searchTerm.toLowerCase())
+              ).map(p => (
                 <tr key={p.id}>
                   <td>{p.id}</td>
                   <td>{p.peminjam}</td>
@@ -65,6 +89,19 @@ export default function PeminjamanAdmin() {
                     }}>
                       {p.status.toUpperCase()}
                     </span>
+                  </td>
+                  <td>
+                    {p.kondisi_alat ? (
+                      <span style={{ color: p.kondisi_alat === 'baik' ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
+                        {p.kondisi_alat === 'baik' ? 'Baik' : p.kondisi_alat === 'rusak' ? 'Rusak' : 'Hilang'}
+                      </span>
+                    ) : '-'}
+                  </td>
+                  <td style={{ color: (p.denda || 0) > 0 ? 'var(--danger)' : 'inherit', fontWeight: (p.denda || 0) > 0 ? 600 : 400 }}>
+                    {p.denda ? `Rp${p.denda.toLocaleString('id-ID')}` : '-'}
+                  </td>
+                  <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={p.catatan || ''}>
+                    {p.catatan || '-'}
                   </td>
                 </tr>
               ))

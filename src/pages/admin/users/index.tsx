@@ -14,6 +14,7 @@ export default function UsersAdmin() {
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ username: '', password: '', role: 'peminjam' });
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -107,6 +108,20 @@ export default function UsersAdmin() {
         </div>
       )}
 
+      <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '1rem' }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Cari username..." 
+            className="form-input" 
+            style={{ paddingLeft: '2.5rem', width: '100%', marginBottom: 0 }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="table-container">
         <table>
           <thead>
@@ -120,7 +135,8 @@ export default function UsersAdmin() {
           </thead>
           <tbody>
             {loading ? <tr><td colSpan={5} style={{textAlign: 'center'}}>Loading...</td></tr> : 
-              users.map(u => (
+              users.filter(u => u.username.toLowerCase().includes(searchTerm.toLowerCase()))
+              .map(u => (
                 <tr key={u.id}>
                   <td>{u.id}</td>
                   <td>{u.username}</td>

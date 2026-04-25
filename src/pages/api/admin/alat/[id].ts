@@ -21,12 +21,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'PUT') {
-    const { nama_alat, deskripsi, jumlah, kategori_id, gambar } = req.body;
+    const { nama_alat, deskripsi, jumlah, kategori_id, gambar, harga } = req.body;
     try {
       const dbKategoriId = kategori_id === '' || !kategori_id ? null : parseInt(kategori_id);
       await pool.query(
-        'UPDATE alat SET nama_alat = ?, deskripsi = ?, jumlah = ?, kategori_id = ?, gambar = ? WHERE id = ?',
-        [nama_alat, deskripsi, jumlah, dbKategoriId, gambar, id]
+        'UPDATE alat SET nama_alat = ?, deskripsi = ?, jumlah = ?, kategori_id = ?, gambar = ?, harga = ? WHERE id = ?',
+        [nama_alat, deskripsi, jumlah, dbKategoriId, gambar, harga || 0, id]
       );
       return res.status(200).json({ message: 'Alat updated' });
     } catch {

@@ -12,10 +12,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const [rows] = await pool.query(`
-        SELECT p.id, u.username as peminjam, a.nama_alat, p.tanggal_pinjam, p.tanggal_kembali, p.status 
+        SELECT p.id, u.username as peminjam, a.nama_alat, p.tanggal_pinjam, p.tanggal_kembali, p.status, 
+               pg.denda, pg.kondisi_alat, pg.catatan
         FROM peminjaman p 
         JOIN users u ON p.user_id = u.id
         JOIN alat a ON p.alat_id = a.id
+        LEFT JOIN pengembalian pg ON p.id = pg.peminjaman_id
         ORDER BY p.tanggal_pinjam DESC
       `);
       return res.status(200).json(rows);

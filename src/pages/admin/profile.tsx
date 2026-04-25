@@ -22,7 +22,6 @@ export default function AdminProfile() {
   const [message, setMessage] = useState('');
 
   const fetchProfile = async () => {
-    setLoading(true);
     const res = await fetch('/api/admin/profile');
     if (res.ok) {
       const data = await res.json();
@@ -37,7 +36,7 @@ export default function AdminProfile() {
   };
 
   useEffect(() => {
-    void fetchProfile();
+    fetchProfile();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,34 +69,23 @@ export default function AdminProfile() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2.5rem', alignItems: 'start' }}>
           
           {/* Section 1: Profile Preview Card */}
-          <div className="glass-card card-premium" style={{ textAlign: 'center', position: 'sticky', top: '100px' }}>
+          <div className="glass-card" style={{ textAlign: 'center', position: 'sticky', top: '100px' }}>
             <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
               <img 
                 src={profile.profile_image || '/images/avatar-admin.png'} 
                 alt="Avatar" 
-                style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-color)', boxShadow: '0 0 20px var(--primary-glow)' }} 
+                style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-color)' }} 
               />
-              <div style={{ position: 'absolute', bottom: '5px', right: '5px', width: '30px', height: '30px', background: 'var(--primary-color)', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '2px solid #0a0b0e' }}>
-                ✏️
-              </div>
             </div>
             
             <h3 style={{ margin: '0 0 0.25rem 0' }}>{profile.full_name || profile.username}</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Administrator Level</p>
-            
-            <div style={{ background: 'rgba(79, 70, 229, 0.1)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--neon-border)', marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '1.2rem' }}>💎</span>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--primary-color)', fontWeight: 700, letterSpacing: '0.1em' }}>PLATINUM ACCESS</p>
-            </div>
-
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-              "{profile.bio || 'Hiduplah seolah-olah kamu akan mati besok. Belajarlah seolah-olah kamu akan hidup selamanya.'}"
-            </p>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{profile.username}</p>
           </div>
 
+
           {/* Section 2: Edit Form */}
-          <div className="glass-card card-premium">
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Informasi Pribadi</h3>
+          <div className="glass-card">
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: 600 }}>Informasi Pribadi</h3>
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 <div className="form-group">

@@ -15,6 +15,7 @@ export default function PeminjamAlat() {
   const [loading, setLoading] = useState(true);
   const [selectedAlat, setSelectedAlat] = useState<Alat | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchAlat = async () => {
     setLoading(true);
@@ -68,8 +69,26 @@ export default function PeminjamAlat() {
         </div>
       )}
 
+      <div className="glass-card" style={{ marginBottom: '2rem', padding: '1rem' }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Cari alat atau kategori..." 
+            className="form-input" 
+            style={{ paddingLeft: '2.5rem', width: '100%', marginBottom: 0 }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
-        {loading ? <p>Loading...</p> : alat.map(a => (
+        {loading ? <p>Loading...</p> : 
+          alat.filter(a => 
+            a.nama_alat.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            (a.nama_kategori && a.nama_kategori.toLowerCase().includes(searchTerm.toLowerCase()))
+          ).map(a => (
           <div key={a.id} className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 0, overflow: 'hidden' }}>
             <div style={{ position: 'relative', height: '180px' }}>
               <img src={a.gambar} alt={a.nama_alat} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

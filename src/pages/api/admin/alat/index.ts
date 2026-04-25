@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const [rows] = await pool.query(`
-        SELECT a.id, a.nama_alat, a.deskripsi, a.jumlah, a.kategori_id, a.gambar, k.nama_kategori 
+        SELECT a.id, a.nama_alat, a.deskripsi, a.jumlah, a.kategori_id, a.gambar, a.harga, k.nama_kategori 
         FROM alat a 
         LEFT JOIN kategori k ON a.kategori_id = k.id
       `);
@@ -25,12 +25,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!user || user.role !== 'admin') return res.status(403).json({ message: 'Forbidden' });
 
   if (req.method === 'POST') {
-    const { kategori_id, nama_alat, deskripsi, jumlah, gambar } = req.body;
+    const { kategori_id, nama_alat, deskripsi, jumlah, gambar, harga } = req.body;
     try {
       const dbKategoriId = kategori_id === '' || !kategori_id ? null : parseInt(kategori_id);
       const [result] = await pool.query<ResultSetHeader>(
-        'INSERT INTO alat (kategori_id, nama_alat, deskripsi, jumlah, gambar) VALUES (?, ?, ?, ?, ?)',
-        [dbKategoriId, nama_alat, deskripsi, jumlah, gambar || '/images/alat/placeholder.png']
+        'INSERT INTO alat (kategori_id, nama_alat, deskripsi, jumlah, gambar, harga) VALUES (?, ?, ?, ?, ?, ?)',
+        [dbKategoriId, nama_alat, deskripsi, jumlah, gambar || '/images/alat/placeholder.png', harga || 0]
       );
       return res.status(201).json({ id: result.insertId, nama_alat });
     } catch {

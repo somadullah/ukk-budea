@@ -23,7 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const [[returnedLoans]] = await pool.query<CountSummary[]>('SELECT COUNT(*) as count FROM peminjaman WHERE status = "dikembalikan"');
       
       const [activities] = await pool.query<RowDataPacket[]>(`
-        SELECT p.id, u.username, a.nama_alat, p.tanggal_pinjam, p.tanggal_kembali, p.status, pg.tanggal_dikembalikan, pg.denda
+        SELECT p.id, u.username, a.nama_alat, p.tanggal_pinjam, p.tanggal_kembali, p.status, 
+               pg.tanggal_dikembalikan, pg.denda, pg.kondisi_alat, pg.catatan
         FROM peminjaman p
         JOIN users u ON p.user_id = u.id
         JOIN alat a ON p.alat_id = a.id

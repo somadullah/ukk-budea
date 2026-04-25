@@ -22,6 +22,8 @@ export default function Layout({ children, title = 'Aplikasi Peminjaman Alat', a
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const allowedRolesString = JSON.stringify(allowedRoles);
+
   useEffect(() => {
     // Check if user is logged in
     const checkAuth = async () => {
@@ -31,7 +33,7 @@ export default function Layout({ children, title = 'Aplikasi Peminjaman Alat', a
           const data = await res.json();
           setUser(data.user);
           if (allowedRoles && !allowedRoles.includes(data.user.role)) {
-            router.push('/unauthorized'); // or redirect based on their role
+            router.push('/unauthorized');
           }
         } else {
           router.push('/login');
@@ -43,13 +45,12 @@ export default function Layout({ children, title = 'Aplikasi Peminjaman Alat', a
       }
     };
     
-    // Skip auth check if we explicitly allow no roles (e.g. login page)
     if (allowedRoles === undefined) {
       setLoading(false);
     } else {
       checkAuth();
     }
-  }, [router, allowedRoles]);
+  }, [router.pathname, allowedRolesString]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -67,36 +68,13 @@ export default function Layout({ children, title = 'Aplikasi Peminjaman Alat', a
       </Head>
 
       
-      {user && user.role !== 'admin' && (
-        <nav className="navbar">
-          <div style={{ fontWeight: '600', fontSize: '1.25rem', color: 'var(--primary-color)' }}>
-            Peminjaman Alat
-          </div>
-          <div className="nav-links">
-            {user.role === 'petugas' && (
-              <>
-                <Link href="/petugas/persetujuan" className="nav-link">Persetujuan</Link>
-                <Link href="/petugas/laporan" className="nav-link">Laporan</Link>
-              </>
-            )}
-            {user.role === 'peminjam' && (
-              <>
-                <Link href="/peminjam/alat" className="nav-link">Daftar Alat</Link>
-                <Link href="/peminjam/pinjam" className="nav-link">Peminjaman Saya</Link>
-              </>
-            )}
-            <button onClick={handleLogout} className="btn" style={{ marginLeft: '1rem', padding: '0.25rem 0.75rem', fontSize: '0.85rem' }}>Logout ({user.username})</button>
-          </div>
-        </nav>
-      )}
-
-      {user && user.role === 'admin' && <Sidebar username={user.username} />}
-
-      <main className={user?.role === 'admin' ? "main-content-with-sidebar" : "container"} style={{ padding: user?.role === 'admin' ? '2rem 3rem' : '2rem 1rem', flex: 1 }}>
+      {user && <Sidebar username={user.username} role={user.role} />}
+      
+      <main className={user ? "main-content-with-sidebar" : "container"} style={{ padding: '2rem 3rem', flex: 1 }}>
         <div className="animate-fade-in">
-          {user && user.role === 'admin' && (
+          {user && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
-               <button onClick={handleLogout} className="btn" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', fontSize: '0.85rem', border: '1px solid var(--glass-border)' }}>Logout</button>
+               <button onClick={handleLogout} className="btn" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', fontSize: '0.85rem', border: '1px solid var(--glass-border)' }}>Logout ({user.username})</button>
             </div>
           )}
           {children}

@@ -14,6 +14,7 @@ interface Peminjaman {
 export default function PersetujuanPetugas() {
   const [data, setData] = useState<Peminjaman[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -52,6 +53,20 @@ export default function PersetujuanPetugas() {
       <h2>Persetujuan Peminjaman</h2>
       <p>Daftar permintaan peminjaman alat yang belum disetujui.</p>
 
+      <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1rem' }}>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
+          <input 
+            type="text" 
+            placeholder="Cari peminjam atau alat..." 
+            className="form-input" 
+            style={{ paddingLeft: '2.5rem', width: '100%', marginBottom: 0 }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="table-container" style={{ marginTop: '2rem' }}>
         <table>
           <thead>
@@ -67,7 +82,10 @@ export default function PersetujuanPetugas() {
           <tbody>
             {loading ? <tr><td colSpan={6} style={{textAlign: 'center'}}>Loading...</td></tr> : 
              data.length === 0 ? <tr><td colSpan={6} style={{textAlign: 'center', color: 'var(--text-muted)'}}>Tidak ada permintaan peminjaman</td></tr> :
-              data.map(p => (
+              data.filter(p => 
+                p.peminjam.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                p.nama_alat.toLowerCase().includes(searchTerm.toLowerCase())
+              ).map(p => (
                 <tr key={p.id}>
                   <td><img src={p.gambar} alt={p.nama_alat} style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} /></td>
                   <td>{p.peminjam}</td>
