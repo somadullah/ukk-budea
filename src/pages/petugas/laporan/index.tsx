@@ -104,8 +104,8 @@ export default function LaporanPetugas() {
                   <tr key={i}>
                     <td style={{ fontWeight: 600 }}>{item.username}</td>
                     <td>{item.nama_alat}</td>
-                    <td>{item.tanggal_pinjam ? new Date(item.tanggal_pinjam).toLocaleDateString() : '-'}</td>
-                    <td>{item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString() : '-'}</td>
+                    <td style={{ fontSize: '0.85rem' }}>{item.tanggal_pinjam ? new Date(item.tanggal_pinjam).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</td>
+                    <td style={{ fontSize: '0.85rem' }}>{item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</td>
                     <td>
                       <span style={{ 
                         padding: '4px 10px', 

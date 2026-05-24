@@ -90,11 +90,49 @@ export default function PersetujuanPetugas() {
                   <td><img src={p.gambar} alt={p.nama_alat} style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} /></td>
                   <td>{p.peminjam}</td>
                   <td style={{ fontWeight: 500 }}>{p.nama_alat}</td>
-                  <td>{new Date(p.tanggal_pinjam).toLocaleDateString()}</td>
-                  <td>{new Date(p.tanggal_kembali).toLocaleDateString()}</td>
+                  <td style={{ fontSize: '0.85rem' }}>{new Date(p.tanggal_pinjam).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+                  <td style={{ fontSize: '0.85rem' }}>{new Date(p.tanggal_kembali).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
                   <td>
-                    <button className="btn btn-success" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', marginRight: '0.5rem' }} onClick={() => handleAction(p.id, 'approve')}>Setujui</button>
-                    <button className="btn btn-danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleAction(p.id, 'reject')}>Tolak</button>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button 
+                        className="btn btn-success" 
+                        style={{ 
+                          padding: '0.4rem 0.8rem', 
+                          fontSize: '0.75rem', 
+                          borderRadius: '6px', 
+                          fontWeight: 600, 
+                          display: 'inline-flex', 
+                          alignItems: 'center', 
+                          gap: '4px',
+                          background: 'linear-gradient(135deg, var(--success), #34d399)',
+                          border: 'none',
+                          color: 'white',
+                          boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
+                        }} 
+                        onClick={() => handleAction(p.id, 'approve')}
+                      >
+                        ✅ Setujui
+                      </button>
+                      <button 
+                        className="btn btn-danger" 
+                        style={{ 
+                          padding: '0.4rem 0.8rem', 
+                          fontSize: '0.75rem', 
+                          borderRadius: '6px', 
+                          fontWeight: 600, 
+                          display: 'inline-flex', 
+                          alignItems: 'center', 
+                          gap: '4px',
+                          background: 'linear-gradient(135deg, var(--danger), #f87171)',
+                          border: 'none',
+                          color: 'white',
+                          boxShadow: '0 2px 4px rgba(239, 68, 68, 0.2)'
+                        }} 
+                        onClick={() => handleAction(p.id, 'reject')}
+                      >
+                        ❌ Tolak
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

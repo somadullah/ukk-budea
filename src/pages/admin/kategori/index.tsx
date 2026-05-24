@@ -167,20 +167,46 @@ export default function KategoriAdmin() {
                           <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)' }}>#{k.id}</span>
                         </td>
                         <td style={{ textAlign: 'center' }}>
-                          <button 
-                            className="btn btn-primary" 
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', marginRight: '0.5rem' }} 
-                            onClick={() => handleEdit(k)}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            className="btn btn-danger" 
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }} 
-                            onClick={() => handleDelete(k.id)}
-                          >
-                            Hapus
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
+                            <button 
+                              className="btn btn-primary" 
+                              style={{ 
+                                padding: '0.4rem 0.8rem', 
+                                fontSize: '0.75rem', 
+                                borderRadius: '6px', 
+                                fontWeight: 600, 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px',
+                                background: 'linear-gradient(135deg, var(--primary-color), #6366f1)',
+                                border: 'none',
+                                color: 'white',
+                                boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
+                              }} 
+                              onClick={() => handleEdit(k)}
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button 
+                              className="btn btn-danger" 
+                              style={{ 
+                                padding: '0.4rem 0.8rem', 
+                                fontSize: '0.75rem', 
+                                borderRadius: '6px', 
+                                fontWeight: 600, 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px',
+                                background: 'linear-gradient(135deg, var(--danger), #f87171)',
+                                border: 'none',
+                                color: 'white',
+                                boxShadow: '0 2px 4px rgba(239, 68, 68, 0.2)'
+                              }} 
+                              onClick={() => handleDelete(k.id)}
+                            >
+                              🗑️ Hapus
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

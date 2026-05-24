@@ -187,7 +187,6 @@ export default function AlatAdmin() {
                     <th>Gambar</th>
                     <th>Nama Alat</th>
                     <th>Kategori</th>
-                    <th>Nilai Asset</th>
                     <th>Stok</th>
                     <th>Deskripsi</th>
                     <th style={{ textAlign: 'center' }}>Aksi</th>
@@ -204,31 +203,67 @@ export default function AlatAdmin() {
                         <td><img src={a.gambar} alt={a.nama_alat} style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} /></td>
                         <td style={{ fontWeight: 600 }}>{a.nama_alat}</td>
                         <td>
-                          <span style={{ padding: '4px 10px', background: 'rgba(79, 70, 229, 0.1)', color: 'var(--primary-color)', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                          <span style={{ 
+                            padding: '4px 12px', 
+                            background: 'rgba(79, 70, 229, 0.15)', 
+                            color: '#818cf8', 
+                            borderRadius: '20px', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 700,
+                            fontStyle: 'normal',
+                            letterSpacing: '0.02em',
+                            border: '1px solid rgba(129, 140, 248, 0.3)',
+                            display: 'inline-block'
+                          }}>
                             {a.nama_kategori || 'Tanpa Kategori'}
                           </span>
                         </td>
-                        <td style={{ fontWeight: 700, color: 'var(--primary-color)' }}>{formatIDR(a.harga)}</td>
                         <td>
                           <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{a.jumlah}</span>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '4px' }}>Unit</span>
                         </td>
                         <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '200px' }}>{a.deskripsi}</td>
                         <td style={{ textAlign: 'center' }}>
-                          <button 
-                            className="btn btn-primary" 
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', marginRight: '0.5rem' }} 
-                            onClick={() => handleEdit(a)}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            className="btn btn-danger" 
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }} 
-                            onClick={() => handleDelete(a.id)}
-                          >
-                            Hapus
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
+                            <button 
+                              className="btn btn-primary" 
+                              style={{ 
+                                padding: '0.4rem 0.8rem', 
+                                fontSize: '0.75rem', 
+                                borderRadius: '6px', 
+                                fontWeight: 600, 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px',
+                                background: 'linear-gradient(135deg, var(--primary-color), #6366f1)',
+                                border: 'none',
+                                color: 'white',
+                                boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
+                              }} 
+                              onClick={() => handleEdit(a)}
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button 
+                              className="btn btn-danger" 
+                              style={{ 
+                                padding: '0.4rem 0.8rem', 
+                                fontSize: '0.75rem', 
+                                borderRadius: '6px', 
+                                fontWeight: 600, 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px',
+                                background: 'linear-gradient(135deg, var(--danger), #f87171)',
+                                border: 'none',
+                                color: 'white',
+                                boxShadow: '0 2px 4px rgba(239, 68, 68, 0.2)'
+                              }} 
+                              onClick={() => handleDelete(a.id)}
+                            >
+                              🗑️ Hapus
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -316,19 +351,7 @@ export default function AlatAdmin() {
                     onChange={e => setFormData({...formData, jumlah: parseInt(e.target.value)})} 
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Nilai Asset / Barang (Rp)</label>
-                  <input 
-                    required 
-                    type="number" 
-                    className="form-input" 
-                    value={formData.harga} 
-                    onChange={e => setFormData({...formData, harga: parseFloat(e.target.value) || 0})} 
-                  />
-                  <div style={{ marginTop: '0.25rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Preview: <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{formatIDR(formData.harga)}</span>
-                  </div>
-                </div>
+
                 <div className="form-group" style={{ gridColumn: 'span 2' }}>
                   <label className="form-label">Deskripsi Alat</label>
                   <textarea 

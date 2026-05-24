@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
+import { formatIDR } from '@/lib/format';
 
 interface Peminjaman {
   id: number;
@@ -90,19 +91,28 @@ export default function PeminjamanAdmin() {
               displayedPeminjaman.map((p, index) => (
                 <tr key={p.id}>
                   <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 500 }}>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                  <td style={{ fontWeight: 600 }}>{p.peminjam}</td>
-                  <td style={{ fontWeight: 500 }}>{p.nama_alat}</td>
-                  <td>{new Date(p.tanggal_pinjam).toLocaleDateString()}</td>
-                  <td>{new Date(p.tanggal_kembali).toLocaleDateString()}</td>
+                  <td style={{ color: 'var(--text-main)', fontWeight: 600 }}>{p.peminjam}</td>
+                  <td style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{p.nama_alat}</td>
+                  <td style={{ fontSize: '0.85rem' }}>{new Date(p.tanggal_pinjam).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+                  <td style={{ fontSize: '0.85rem' }}>{new Date(p.tanggal_kembali).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
                   <td>
                     <span style={{ 
-                      padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700,
+                      padding: '4px 12px', 
+                      borderRadius: '20px', 
+                      fontSize: '0.7rem', 
+                      fontWeight: 800,
+                      letterSpacing: '0.05em',
+                      fontStyle: 'normal',
+                      display: 'inline-block',
                       background: p.status === 'dipinjam' ? 'rgba(245, 158, 11, 0.15)' : 
                                   p.status === 'dikembalikan' ? 'rgba(16, 185, 129, 0.15)' : 
                                   p.status === 'ditolak' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(99, 102, 241, 0.15)',
                       color: p.status === 'dipinjam' ? 'var(--warning)' : 
                              p.status === 'dikembalikan' ? 'var(--success)' : 
-                             p.status === 'ditolak' ? 'var(--danger)' : 'var(--primary-color)' 
+                             p.status === 'ditolak' ? 'var(--danger)' : 'var(--primary-color)',
+                      border: p.status === 'dipinjam' ? '1px solid rgba(245, 158, 11, 0.3)' : 
+                              p.status === 'dikembalikan' ? '1px solid rgba(16, 185, 129, 0.3)' : 
+                              p.status === 'ditolak' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(99, 102, 241, 0.3)'
                     }}>
                       {p.status?.toUpperCase() || 'UNKNOWN'}
                     </span>
@@ -110,19 +120,25 @@ export default function PeminjamanAdmin() {
                   <td>
                     {p.kondisi_alat ? (
                       <span style={{ 
-                        padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem',
-                        background: p.kondisi_alat === 'baik' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        color: p.kondisi_alat === 'baik' ? 'var(--success)' : 'var(--danger)', 
-                        fontWeight: 600 
+                        padding: '4px 10px', 
+                        borderRadius: '6px', 
+                        fontSize: '0.7rem',
+                        fontWeight: 800,
+                        fontStyle: 'normal',
+                        display: 'inline-block',
+                        letterSpacing: '0.05em',
+                        background: p.kondisi_alat === 'baik' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                        color: p.kondisi_alat === 'baik' ? 'var(--success)' : 'var(--danger)',
+                        border: p.kondisi_alat === 'baik' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)'
                       }}>
                         {p.kondisi_alat.toUpperCase()}
                       </span>
                     ) : '-'}
                   </td>
-                  <td style={{ color: (p.denda || 0) > 0 ? 'var(--danger)' : 'inherit', fontWeight: (p.denda || 0) > 0 ? 600 : 400 }}>
-                    {p.denda ? `Rp${p.denda.toLocaleString('id-ID')}` : '-'}
+                  <td style={{ color: (p.denda ? parseFloat(p.denda.toString()) : 0) > 0 ? 'var(--danger)' : 'inherit', fontWeight: (p.denda ? parseFloat(p.denda.toString()) : 0) > 0 ? 700 : 400 }}>
+                    {p.denda && parseFloat(p.denda.toString()) > 0 ? formatIDR(p.denda) : '-'}
                   </td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={p.catatan || ''}>
+                  <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={p.catatan || ''}>
                     {p.catatan || '-'}
                   </td>
                 </tr>

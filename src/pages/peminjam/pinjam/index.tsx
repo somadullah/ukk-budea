@@ -112,10 +112,10 @@ export default function MyLoans() {
                       <div>
                         <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{loan.nama_alat}</h3>
                         <p style={{ margin: '6px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          🗓️ Pinjam: {new Date(loan.tanggal_pinjam).toLocaleDateString()}
+                          🗓️ Pinjam: {new Date(loan.tanggal_pinjam).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
                         <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          🏁 Batas: {new Date(loan.tanggal_kembali).toLocaleDateString()}
+                          🏁 Batas: {new Date(loan.tanggal_kembali).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
                       </div>
                     </div>
