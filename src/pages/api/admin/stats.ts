@@ -8,6 +8,7 @@ interface CountRow extends RowDataPacket {
   alatCount?: number;
   pinjamCount?: number;
   requestCount?: number;
+  totalDenda?: number;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -21,8 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const [[{ usersCount }]] = await pool.query<CountRow[]>('SELECT COUNT(*) as usersCount FROM users');
       const [[{ alatCount }]] = await pool.query<CountRow[]>('SELECT COUNT(*) as alatCount FROM alat');
-      const [[{ pinjamCount }]] = await pool.query<CountRow[]>('SELECT COUNT(*) as pinjamCount FROM peminjaman WHERE status = "dipinjam"');
+      const [[{ pinjamCount }]] = await pool.query<CountRow[]>('SELECT COUNT(*) as pinjamCount FROM peminjaman WHERE status IN ("dipinjam", "kembali_diajukan")');
       const [[{ requestCount }]] = await pool.query<CountRow[]>('SELECT COUNT(*) as requestCount FROM peminjaman WHERE status = "menunggu"');
+      const [[{ totalDenda }]] = await pool.query<CountRow[]>('SELECT SUM(denda) as totalDenda FROM pengembalian');
       
       // Historical data for chart (Last 7 days or mock for visual impact)
       const chartData = [
@@ -42,6 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         alat: alatCount || 0,
         pinjam: pinjamCount || 0,
         requests: requestCount || 0,
+        totalDenda: totalDenda || 0,
         chartData,
         satisfaction
       });

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 
 interface SidebarProps {
   username: string;
-  role: 'admin' | 'petugas' | 'peminjam';
+  role: 'admin' | 'petugas' | 'peminjam' | 'guru';
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ username, role }) => {
@@ -12,15 +12,23 @@ const Sidebar: React.FC<SidebarProps> = ({ username, role }) => {
 
   const allItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: '📊', roles: ['admin'] },
-    { name: 'Persetujuan', path: '/petugas/persetujuan', icon: '✅', roles: ['admin', 'petugas'] },
-    { name: 'Pengembalian', path: '/petugas/pengembalian', icon: '📥', roles: ['admin', 'petugas'] },
+    // Admin Features
+    { name: 'Kelola User', path: '/admin/users', icon: '👥', roles: ['admin'] },
+    { name: 'Kelola Alat', path: '/admin/alat', icon: '🔧', roles: ['admin'] },
+    { name: 'Kelola Kategori', path: '/admin/kategori', icon: '📁', roles: ['admin'] },
     { name: 'Data Peminjaman', path: '/admin/peminjaman', icon: '📋', roles: ['admin'] },
-    { name: 'Manajemen Alat', path: '/admin/alat', icon: '🔧', roles: ['admin'] },
-    { name: 'Daftar Alat', path: '/peminjam/alat', icon: '🔍', roles: ['peminjam'] },
-    { name: 'Peminjaman Saya', path: '/peminjam/pinjam', icon: '📦', roles: ['peminjam'] },
-    { name: 'Kelola Users', path: '/admin/users', icon: '👥', roles: ['admin'] },
-    { name: 'Log Aktifitas', path: '/admin/logs', icon: '📜', roles: ['admin'] },
-    { name: 'Laporan', path: '/petugas/laporan', icon: '📈', roles: ['admin', 'petugas'] },
+    { name: 'Data Pengembalian', path: '/petugas/pengembalian', icon: '📥', roles: ['admin'] },
+    { name: 'Log Aktivitas', path: '/admin/logs', icon: '📜', roles: ['admin'] },
+    
+    // Petugas Features
+    { name: 'Menyetujui Peminjaman', path: '/petugas/persetujuan', icon: '✅', roles: ['petugas'] },
+    { name: 'Memantau Pengembalian', path: '/petugas/pengembalian', icon: '📥', roles: ['petugas'] },
+    { name: 'Catatan Sanksi', path: '/petugas/denda', icon: '⚠️', roles: ['petugas'] },
+    { name: 'Mencetak Laporan', path: '/petugas/laporan', icon: '📈', roles: ['petugas'] },
+    
+    // Peminjam Features
+    { name: 'Melihat Daftar Alat', path: '/peminjam/alat', icon: '🔍', roles: ['peminjam'] },
+    { name: 'Mengajukan Peminjaman', path: '/peminjam/pinjam', icon: '📦', roles: ['peminjam'] },
   ];
 
   const menuItems = allItems.filter(item => item.roles.includes(role));
@@ -33,7 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ username, role }) => {
         </h2>
       </div>
 
-      <Link href="/admin/profile" style={{ 
+      <Link href={`/${role}/profile`} style={{ 
         marginBottom: '2rem', 
         padding: '1rem', 
         background: 'rgba(255,255,255,0.03)', 
@@ -56,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ username, role }) => {
             {username}
           </p>
           <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-            {role === 'admin' ? 'Administrator' : role === 'petugas' ? 'Petugas Lapangan' : 'Peminjam Alat'}
+            {role === 'admin' ? 'Administrator' : role === 'petugas' ? 'Petugas Lapangan' : role === 'guru' ? 'Guru' : 'Peminjam Alat'}
           </p>
         </div>
       </Link>

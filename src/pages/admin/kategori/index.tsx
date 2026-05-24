@@ -9,17 +9,37 @@ interface Kategori {
 export default function KategoriAdmin() {
   const [kategori, setKategori] = useState<Kategori[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'edit'>('list');
   const [editId, setEditId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ nama_kategori: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Search and Pagination Logic
+  const filteredKategori = kategori.filter(k => 
+    k.nama_kategori.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredKategori.length / itemsPerPage);
+  const displayedKategori = filteredKategori.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const fetchKategori = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/kategori');
-    if (res.ok) {
-      setKategori(await res.json());
+    try {
+      const res = await fetch('/api/admin/kategori');
+      if (res.ok) {
+        setKategori(await res.json());
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -28,31 +48,41 @@ export default function KategoriAdmin() {
     })();
   }, []);
 
+  const resetForm = () => {
+    setFormData({ nama_kategori: '' });
+    setEditId(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const url = editId ? `/api/admin/kategori/${editId}` : '/api/admin/kategori';
     const method = editId ? 'PUT' : 'POST';
 
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-    if (res.ok) {
-      setShowModal(false);
-      setEditId(null);
-      setFormData({ nama_kategori: '' });
-      fetchKategori();
-    } else {
-      const data = await res.json();
-      alert(`Gagal: ${data.message || 'Error menyimpan kategori'}`);
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        setEditId(null);
+        resetForm();
+        setActiveTab('list');
+        fetchKategori();
+        alert(method === 'POST' ? 'Kategori berhasil ditambahkan!' : 'Kategori berhasil diperbarui!');
+      } else {
+        const data = await res.json();
+        alert(`Gagal: ${data.message || 'Error menyimpan kategori'}`);
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan koneksi');
     }
   };
 
   const handleEdit = (item: Kategori) => {
     setEditId(item.id);
     setFormData({ nama_kategori: item.nama_kategori });
-    setShowModal(true);
+    setActiveTab('edit');
   };
 
   const handleDelete = async (id: number) => {
@@ -68,54 +98,167 @@ export default function KategoriAdmin() {
 
   return (
     <Layout title="Manajemen Kategori" allowedRoles={['admin']}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2>Manajemen Kategori</h2>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Tambah Kategori</button>
-      </div>
+      <div className="animate-fade-in">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Manajemen Kategori</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>Organisir peralatan berdasarkan jenis dan fungsinya.</p>
+          </div>
+        </div>
 
-      {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="glass-card animate-fade-in" style={{ width: '400px', background: 'var(--bg-color)' }}>
-            <h3>{editId ? 'Edit Kategori' : 'Tambah Kategori'}</h3>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
+          <button 
+            className={`btn ${activeTab === 'list' ? 'btn-primary' : ''}`} 
+            style={{ background: activeTab === 'list' ? '' : 'transparent', border: activeTab === 'list' ? '' : '1px solid rgba(255,255,255,0.1)' }}
+            onClick={() => { setActiveTab('list'); setEditId(null); }}
+          >
+            📋 Daftar Kategori
+          </button>
+          <button 
+            className={`btn ${activeTab === 'add' ? 'btn-primary' : ''}`}
+            style={{ background: activeTab === 'add' ? '' : 'transparent', border: activeTab === 'add' ? '' : '1px solid rgba(255,255,255,0.1)' }}
+            onClick={() => { resetForm(); setActiveTab('add'); }}
+          >
+            ➕ Tambah Kategori
+          </button>
+          {activeTab === 'edit' && (
+            <button className="btn btn-primary">✏️ Edit Kategori</button>
+          )}
+        </div>
+
+        {activeTab === 'list' && (
+          <>
+            <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '1rem' }}>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>🔍</span>
+                <input 
+                  type="text" 
+                  placeholder="Cari kategori..." 
+                  className="form-input" 
+                  style={{ paddingLeft: '2.5rem', width: '100%', marginBottom: 0 }}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: '80px' }}>No</th>
+                    <th>Nama Kategori</th>
+                    <th>ID Sistem</th>
+                    <th style={{ textAlign: 'center' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td></tr>
+                  ) : displayedKategori.length === 0 ? (
+                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }}>Tidak ada data kategori.</td></tr>
+                  ) : (
+                    displayedKategori.map((k, index) => (
+                      <tr key={k.id}>
+                        <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 500 }}>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                        <td style={{ fontWeight: 600, fontSize: '1rem' }}>{k.nama_kategori}</td>
+                        <td>
+                          <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)' }}>#{k.id}</span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button 
+                            className="btn btn-primary" 
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', marginRight: '0.5rem' }} 
+                            onClick={() => handleEdit(k)}
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            className="btn btn-danger" 
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }} 
+                            onClick={() => handleDelete(k.id)}
+                          >
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '2rem' }}>
+                <button 
+                  disabled={currentPage === 1}
+                  className="btn" 
+                  style={{ 
+                    padding: '0.5rem 1rem', 
+                    background: 'rgba(255,255,255,0.05)', 
+                    opacity: currentPage === 1 ? 0.5 : 1,
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+                  }}
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                >
+                  ◀️ Prev
+                </button>
+                <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                  Halaman <span style={{ color: 'var(--primary-color)' }}>{currentPage}</span> dari {totalPages}
+                </div>
+                <button 
+                  disabled={currentPage === totalPages}
+                  className="btn" 
+                  style={{ 
+                    padding: '0.5rem 1rem', 
+                    background: 'rgba(255,255,255,0.05)', 
+                    opacity: currentPage === totalPages ? 0.5 : 1,
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+                  }}
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                >
+                  Next ▶️
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {(activeTab === 'add' || activeTab === 'edit') && (
+          <div className="glass-card animate-scale-in" style={{ maxWidth: '500px', margin: '0 auto' }}>
+            <h3 style={{ marginBottom: '1.5rem' }}>{activeTab === 'add' ? 'Tambah Kategori Baru' : 'Perbarui Nama Kategori'}</h3>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">Nama Kategori</label>
-                <input required className="form-input" value={formData.nama_kategori} onChange={e => setFormData({...formData, nama_kategori: e.target.value})} />
+                <input 
+                  required 
+                  className="form-input" 
+                  placeholder="Contoh: Alat Medis, Perlengkapan Olahraga"
+                  value={formData.nama_kategori} 
+                  onChange={e => setFormData({...formData, nama_kategori: e.target.value})} 
+                />
               </div>
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{editId ? 'Update' : 'Simpan'}</button>
-                <button type="button" className="btn" style={{ flex: 1, background: 'var(--text-muted)', color: 'white' }} onClick={() => { setShowModal(false); setEditId(null); setFormData({ nama_kategori: '' }); }}>Batal</button>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '0.8rem' }}>
+                  {activeTab === 'add' ? '✨ Simpan Kategori' : '💾 Update Kategori'}
+                </button>
+                <button 
+                  type="button" 
+                  className="btn" 
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'white', padding: '0.8rem' }} 
+                  onClick={() => { setActiveTab('list'); resetForm(); }}
+                >
+                  Batal
+                </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
-
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nama Kategori</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? <tr><td colSpan={3} style={{textAlign: 'center'}}>Loading...</td></tr> : 
-              kategori.map(k => (
-                <tr key={k.id}>
-                  <td>{k.id}</td>
-                  <td style={{ fontWeight: 500 }}>{k.nama_kategori}</td>
-                  <td>
-                    <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', marginRight: '0.5rem' }} onClick={() => handleEdit(k)}>Edit</button>
-                    <button className="btn btn-danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleDelete(k.id)}>Hapus</button>
-                  </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
+        )}
       </div>
     </Layout>
   );
 }
+

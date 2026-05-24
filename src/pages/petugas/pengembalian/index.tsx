@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
+import { formatIDR } from '@/lib/format';
 
 interface Peminjaman {
   id: number;
@@ -44,7 +45,22 @@ export default function PengembalianPetugas() {
   const openReturnModal = (loan: Peminjaman) => {
     setSelectedLoan(loan);
     setKondisi('baik');
-    setDenda(0);
+    
+    // Hitung denda otomatis saat buka modal
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(loan.tanggal_kembali);
+    dueDate.setHours(0, 0, 0, 0);
+    
+    const diffTime = today.getTime() - dueDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 0) {
+      setDenda(diffDays * 5000); // Otomatis Rp 5.000 per hari telat
+    } else {
+      setDenda(0);
+    }
+    
     setCatatan('');
     setShowModal(true);
   };
@@ -74,8 +90,8 @@ export default function PengembalianPetugas() {
         const err = await res.json();
         alert(err.message || 'Gagal mencatat pengembalian');
       }
-    } catch (err) {
-      alert('Terjadi kesalahan koneksi');
+    } catch (err: unknown) {
+      alert('Kesalahan jaringan: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +196,7 @@ export default function PengembalianPetugas() {
                 </p>
                 {selectedLoan.catatan_peminjam && (
                   <p style={{ margin: '4px 0 0', fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    "{selectedLoan.catatan_peminjam}"
+                    &quot;{selectedLoan.catatan_peminjam}&quot;
                   </p>
                 )}
               </div>
@@ -192,7 +208,7 @@ export default function PengembalianPetugas() {
                 <select 
                   className="form-input" 
                   value={kondisi} 
-                  onChange={e => setKondisi(e.target.value as any)}
+                  onChange={e => setKondisi(e.target.value as 'baik' | 'rusak' | 'hilang')}
                   style={{ cursor: 'pointer' }}
                 >
                   <option value="baik">✅ Baik / Normal</option>
@@ -207,38 +223,30 @@ export default function PengembalianPetugas() {
                   <span style={{ fontSize: '0.75rem', color: 'var(--primary-color)', cursor: 'pointer' }} onClick={() => setDenda(0)}>Reset</span>
                 </label>
                 
-                {/* Deteksi Telat Otomatis */}
+                {/* Info Telat Otomatis */}
                 {Math.ceil((new Date().getTime() - new Date(selectedLoan.tanggal_kembali).getTime()) / (1000 * 3600 * 24)) > 0 && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--danger)', fontWeight: 600 }}>
-                      ⚠️ Terlambat {Math.ceil((new Date().getTime() - new Date(selectedLoan.tanggal_kembali).getTime()) / (1000 * 3600 * 24))} Hari
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--danger)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>⚠️</span> TERLAMBAT {Math.ceil((new Date().getTime() - new Date(selectedLoan.tanggal_kembali).getTime()) / (1000 * 3600 * 24))} HARI
                     </p>
-                    <button 
-                      type="button"
-                      style={{ background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: '0.7rem', marginTop: '4px', cursor: 'pointer' }}
-                      onClick={() => {
-                        const days = Math.ceil((new Date().getTime() - new Date(selectedLoan.tanggal_kembali).getTime()) / (1000 * 3600 * 24));
-                        setDenda(prev => prev + (days * 5000));
-                      }}
-                    >
-                      + Terapkan Denda Telat (Rp5.000/hr)
-                    </button>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
+                      Denda otomatis diterapkan: <strong>Rp5.000 x {Math.ceil((new Date().getTime() - new Date(selectedLoan.tanggal_kembali).getTime()) / (1000 * 3600 * 24))} hari</strong>. Anda masih bisa menambahkannya jika ada kerusakan.
+                    </p>
                   </div>
                 )}
 
                 <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 600, color: 'var(--text-muted)' }}>Rp</span>
                   <input 
                     type="number" 
                     className="form-input" 
-                    style={{ paddingLeft: '3rem', fontSize: '1.2rem', fontWeight: 700, color: denda > 0 ? 'var(--danger)' : 'inherit' }}
+                    style={{ paddingLeft: '1rem', fontSize: '1.2rem', fontWeight: 700, color: denda > 0 ? 'var(--danger)' : 'var(--primary-color)', textAlign: 'right', paddingRight: '1rem' }}
                     placeholder="0" 
                     value={denda} 
                     onChange={e => setDenda(parseInt(e.target.value) || 0)} 
                   />
                 </div>
-                <div style={{ marginTop: '0.4rem', fontSize: '0.85rem', color: 'var(--primary-color)', fontWeight: 600 }}>
-                  Format: Rp{denda.toLocaleString('id-ID')}
+                <div style={{ marginTop: '0.4rem', fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'right' }}>
+                  Terbilang: <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{formatIDR(denda)}</span>
                 </div>
 
                 {/* Quick Presets Berdasarkan Harga Alat */}

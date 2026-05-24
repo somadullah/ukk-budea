@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 
+
 interface Alat {
   id: number;
   nama_alat: string;
@@ -8,6 +9,7 @@ interface Alat {
   jumlah: number;
   nama_kategori: string;
   gambar: string;
+  harga: number;
 }
 
 export default function PeminjamAlat() {
@@ -102,9 +104,12 @@ export default function PeminjamAlat() {
               <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>{a.nama_alat}</h3>
               <p style={{ flex: 1, fontSize: '0.9rem', color: 'var(--text-muted)', lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{a.deskripsi}</p>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
-                <span style={{ fontWeight: 600, color: a.jumlah > 0 ? 'var(--success)' : 'var(--danger)', fontSize: '0.9rem' }}>
-                  Stok: {a.jumlah} unit
-                </span>
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Ketersediaan</p>
+                  <span style={{ fontWeight: 800, color: a.jumlah > 0 ? 'var(--success)' : 'var(--danger)', fontSize: '1rem' }}>
+                    {a.jumlah > 0 ? `Ready: ${a.jumlah} unit` : 'Sedang Habis'}
+                  </span>
+                </div>
                 <button 
                   className="btn btn-primary" 
                   disabled={a.jumlah === 0}

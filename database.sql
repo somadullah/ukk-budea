@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS alat (
     nama_alat VARCHAR(150) NOT NULL,
     deskripsi TEXT,
     jumlah INT DEFAULT 0,
+    gambar VARCHAR(255) DEFAULT '/images/alat/placeholder.png',
+    harga DECIMAL(10, 2) DEFAULT 0,
     FOREIGN KEY (kategori_id) REFERENCES kategori(id) ON DELETE SET NULL
 );
 
@@ -41,7 +43,9 @@ CREATE TABLE IF NOT EXISTS peminjaman (
     alat_id INT,
     tanggal_pinjam DATE NOT NULL,
     tanggal_kembali DATE NOT NULL,
-    status ENUM('menunggu', 'dipinjam', 'dikembalikan', 'ditolak') DEFAULT 'menunggu',
+    status ENUM('menunggu', 'dipinjam', 'dikembalikan', 'ditolak', 'kembali_diajukan') DEFAULT 'menunggu',
+    kondisi_peminjam ENUM('baik', 'rusak', 'hilang') DEFAULT 'baik',
+    catatan_peminjam TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (alat_id) REFERENCES alat(id) ON DELETE CASCADE
 );
@@ -52,7 +56,11 @@ CREATE TABLE IF NOT EXISTS pengembalian (
     peminjaman_id INT,
     tanggal_dikembalikan DATE NOT NULL,
     denda DECIMAL(10, 2) DEFAULT 0,
-    FOREIGN KEY (peminjaman_id) REFERENCES peminjaman(id) ON DELETE CASCADE
+    kondisi_alat ENUM('baik', 'rusak', 'hilang') DEFAULT 'baik',
+    catatan TEXT,
+    petugas_id INT,
+    FOREIGN KEY (peminjaman_id) REFERENCES peminjaman(id) ON DELETE CASCADE,
+    FOREIGN KEY (petugas_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- 6. Tabel Log Aktifitas
@@ -76,14 +84,20 @@ BEGIN
 END //
 DELIMITER ;
 
--- 8. Trigger: Otomatis tambah stok saat dikembalikan
+-- 8. Trigger: Otomatis tambah stok saat dikembalikan (Hanya jika kondisi baik)
 DELIMITER //
 CREATE TRIGGER IF NOT EXISTS after_pengembalian_insert
 AFTER INSERT ON pengembalian
 FOR EACH ROW
 BEGIN
+    -- Trigger ini opsional jika logic sudah di handle di API, 
+    -- tapi baik untuk keamanan data integrity.
     UPDATE peminjaman SET status = 'dikembalikan' WHERE id = NEW.peminjaman_id;
-    UPDATE alat SET jumlah = jumlah + 1 WHERE id = (SELECT alat_id FROM peminjaman WHERE id = NEW.peminjaman_id);
+    
+    -- Hanya tambah stok jika kondisi alat baik
+    IF NEW.kondisi_alat = 'baik' THEN
+        UPDATE alat SET jumlah = jumlah + 1 WHERE id = (SELECT alat_id FROM peminjaman WHERE id = NEW.peminjaman_id);
+    END IF;
 END //
 DELIMITER ;
 
@@ -116,7 +130,7 @@ INSERT IGNORE INTO kategori (id, nama_kategori) VALUES
 (2, 'Peralatan Jaringan');
 
 -- 12. Data Default - Alat
-INSERT IGNORE INTO alat (id, kategori_id, nama_alat, deskripsi, jumlah) VALUES 
-(1, 1, 'Proyektor Epson', 'Proyektor untuk presentasi', 5),
-(2, 2, 'Kabel UTP 10m', 'Kabel LAN', 20),
-(3, 1, 'Laptop Lenovo Thinkpad', 'Laptop core i5', 3);
+INSERT IGNORE INTO alat (id, kategori_id, nama_alat, deskripsi, jumlah, gambar, harga) VALUES 
+(1, 1, 'Proyektor Epson', 'Proyektor untuk presentasi', 5, '/images/alat/proyektor.png', 3500000),
+(2, 2, 'Kabel UTP 10m', 'Kabel LAN', 20, '/images/alat/kabel.png', 50000),
+(3, 1, 'Laptop Lenovo Thinkpad', 'Laptop core i5', 3, '/images/alat/laptop.png', 7500000);

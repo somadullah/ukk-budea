@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 
 import Sidebar from '@/components/Sidebar';
 
 interface User {
   id: number;
   username: string;
-  role: 'admin' | 'petugas' | 'peminjam';
+  role: 'admin' | 'petugas' | 'peminjam' | 'guru';
 }
 
 interface LayoutProps {
   children: React.ReactNode;
   title?: string;
-  allowedRoles?: ('admin' | 'petugas' | 'peminjam')[];
+  allowedRoles?: ('admin' | 'petugas' | 'peminjam' | 'guru')[];
 }
 
 export default function Layout({ children, title = 'Aplikasi Peminjaman Alat', allowedRoles }: LayoutProps) {
@@ -50,7 +49,7 @@ export default function Layout({ children, title = 'Aplikasi Peminjaman Alat', a
     } else {
       checkAuth();
     }
-  }, [router.pathname, allowedRolesString]);
+  }, [router, allowedRolesString]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
+import { formatIDR } from '@/lib/format';
 
 interface Activity {
   id: number;
@@ -12,6 +13,7 @@ interface Activity {
   denda: number;
   kondisi_alat: 'baik' | 'rusak' | 'hilang' | null;
   catatan: string | null;
+  status_denda: 'lunas' | 'belum_lunas' | null;
 }
 
 interface ReportData {
@@ -102,8 +104,8 @@ export default function LaporanPetugas() {
                   <tr key={i}>
                     <td style={{ fontWeight: 600 }}>{item.username}</td>
                     <td>{item.nama_alat}</td>
-                    <td>{new Date(item.tanggal_pinjam).toLocaleDateString()}</td>
-                    <td>{new Date(item.tanggal_kembali).toLocaleDateString()}</td>
+                    <td>{item.tanggal_pinjam ? new Date(item.tanggal_pinjam).toLocaleDateString() : '-'}</td>
+                    <td>{item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString() : '-'}</td>
                     <td>
                       <span style={{ 
                         padding: '4px 10px', 
@@ -112,12 +114,14 @@ export default function LaporanPetugas() {
                         fontWeight: 600,
                         backgroundColor: 
                           item.status === 'dikembalikan' ? 'rgba(16, 185, 129, 0.1)' : 
-                          item.status === 'dipinjam' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          item.status === 'dipinjam' ? 'rgba(245, 158, 11, 0.1)' : 
+                          item.status === 'kembali_diajukan' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                         color: 
                           item.status === 'dikembalikan' ? 'var(--success)' : 
-                          item.status === 'dipinjam' ? 'var(--warning)' : 'var(--danger)'
+                          item.status === 'dipinjam' ? 'var(--warning)' : 
+                          item.status === 'kembali_diajukan' ? 'var(--primary-color)' : 'var(--danger)'
                       }}>
-                        {item.status.toUpperCase()}
+                        {item.status?.toUpperCase().replace('_', ' ') || 'UNKNOWN'}
                       </span>
                     </td>
                     <td>
@@ -126,8 +130,17 @@ export default function LaporanPetugas() {
                       {item.kondisi_alat === 'hilang' && <span style={{ color: 'var(--danger)', fontWeight: 600 }}>❌ Hilang</span>}
                       {!item.kondisi_alat && '-'}
                     </td>
-                    <td style={{ fontWeight: item.denda > 0 ? 600 : 400, color: item.denda > 0 ? 'var(--danger)' : 'inherit' }}>
-                      {item.denda > 0 ? `Rp${item.denda.toLocaleString('id-ID')}` : '-'}
+                    <td style={{ fontWeight: 700 }}>
+                      {item.denda > 0 ? (
+                        <div>
+                          <div style={{ color: item.status_denda === 'lunas' ? 'var(--success)' : 'var(--danger)', fontSize: '1rem' }}>
+                            {formatIDR(item.denda)}
+                          </div>
+                          <div style={{ fontSize: '0.65rem', opacity: 0.7, textTransform: 'uppercase', marginTop: '2px' }}>
+                            {item.status_denda === 'lunas' ? '✅ Lunas' : '⌛ Belum Bayar'}
+                          </div>
+                        </div>
+                      ) : '-'}
                     </td>
                     <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.catatan || ''}>
                       {item.catatan || '-'}

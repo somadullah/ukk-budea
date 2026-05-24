@@ -11,19 +11,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).json({ message: 'Forbidden' });
   }
 
-  if (req.method === 'GET') {
+  if (req.method === 'POST') {
+    const { invoice_id } = req.body;
     try {
-      const [rows] = await pool.query(`
-        SELECT p.id, p.tanggal_pinjam, p.tanggal_kembali, p.status, 
-               u.username as peminjam, a.nama_alat, a.gambar, a.harga,
-               p.kondisi_peminjam, p.catatan_peminjam
-        FROM peminjaman p
-        JOIN users u ON p.user_id = u.id
-        JOIN alat a ON p.alat_id = a.id
-        WHERE p.status IN ('dipinjam', 'kembali_diajukan')
-        ORDER BY FIELD(p.status, 'kembali_diajukan', 'dipinjam'), p.tanggal_kembali ASC
-      `);
-      return res.status(200).json(rows);
+      await pool.query(
+        'UPDATE pengembalian SET status_denda = "lunas" WHERE id = ?',
+        [invoice_id]
+      );
+      return res.status(200).json({ message: 'Pembayaran denda berhasil dikonfirmasi!' });
     } catch {
       return res.status(500).json({ message: 'Database error' });
     }

@@ -46,7 +46,11 @@ export default function Login() {
 
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: 'var(--bg-color)' }}>
         <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: '400px', padding: '3rem' }}>
-          <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: 'var(--primary-color)' }}>Log In</h2>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <img src="/images/logo.jpg" alt="Logo" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem', border: '3px solid var(--primary-color)' }} />
+            <h2 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '1.75rem', fontWeight: 700 }}>Peminjaman Alat</h2>
+            <p style={{ margin: '0.5rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Silakan masuk untuk melanjutkan</p>
+          </div>
           
           {error && (
             <div style={{ padding: '0.8rem', backgroundColor: 'var(--danger)', color: 'white', borderRadius: 'var(--radius-sm)', marginBottom: '1.2rem', fontSize: '0.9rem' }}>
@@ -85,7 +89,7 @@ export default function Login() {
                 className="btn btn-primary btn-block" 
                 disabled={loading}
               >
-                {loading ? 'Logging in...' : 'Sign In'}
+                {loading ? 'Logging in...' : 'Login'}
               </button>
             </div>
           </form>

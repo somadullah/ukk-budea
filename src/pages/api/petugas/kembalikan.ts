@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import pool from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
+import { RowDataPacket } from 'mysql2';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const token = req.cookies.auth_token;
@@ -24,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await connection.beginTransaction();
 
       // 1. Get loan details to find tool ID
-      const [loan]: any = await connection.query(
+      const [loan] = await connection.query<RowDataPacket[]>(
         'SELECT alat_id, status FROM peminjaman WHERE id = ?',
         [peminjaman_id]
       );
@@ -37,33 +38,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error('Alat tidak dalam status dapat dikembalikan');
       }
 
-      const alat_id = loan[0].alat_id;
-
-      // 2. Update status to 'dikembalikan'
-      await connection.query(
-        'UPDATE peminjaman SET status = ? WHERE id = ?',
-        ['dikembalikan', peminjaman_id]
-      );
-
-      // 3. Insert into pengembalian
+      // 2. Insert into pengembalian
+      // The trigger 'after_pengembalian_insert' will automatically:
+      // - Update peminjaman status to 'dikembalikan'
+      // - Increase tool 'jumlah' (stock) if condition is 'baik'
       await connection.query(
         `INSERT INTO pengembalian (peminjaman_id, tanggal_dikembalikan, denda, kondisi_alat, catatan, petugas_id) 
          VALUES (?, NOW(), ?, ?, ?, ?)`,
         [peminjaman_id, denda || 0, kondisi_alat, catatan || '', user.id]
       );
-
-      // 4. Update tool stock if condition is 'baik'
-      // If 'rusak' or 'hilang', we might not want to increase stock immediately
-      if (kondisi_alat === 'baik') {
-        await connection.query(
-          'UPDATE alat SET stok = stok + 1 WHERE id = ?',
-          [alat_id]
-        );
-      } else if (kondisi_alat === 'rusak') {
-        // Log damage or something? For now, we don't increase stock
-        // Maybe we have a logic to mark tool itself as damaged if it's a unique tool, 
-        // but here it seems tools have "stok" (quantity).
-      }
 
       // 5. Log Activity
       await connection.query(
@@ -74,10 +57,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await connection.commit();
       return res.status(200).json({ message: 'Pengembalian berhasil dicatat' });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       await connection.rollback();
       console.error(err);
-      return res.status(500).json({ message: err.message || 'Database error' });
+      return res.status(500).json({ message: err instanceof Error ? err.message : 'Database error' });
     } finally {
       connection.release();
     }

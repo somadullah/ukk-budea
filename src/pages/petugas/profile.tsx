@@ -9,7 +9,7 @@ interface ProfileData {
   profile_image: string | null;
 }
 
-export default function AdminProfile() {
+export default function PetugasProfile() {
   const [profile, setProfile] = useState<ProfileData>({
     username: '',
     full_name: '',
@@ -61,7 +61,7 @@ export default function AdminProfile() {
   if (loading) return <Layout title="Loading..."><p>Memuat profil...</p></Layout>;
 
   return (
-    <Layout title="Profil Admin" allowedRoles={['admin']}>
+    <Layout title="Profil Petugas" allowedRoles={['petugas', 'admin']}>
       <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <h2 style={{ marginBottom: '2rem' }}>Pengaturan Akun</h2>
 
@@ -79,6 +79,7 @@ export default function AdminProfile() {
             
             <h3 style={{ margin: '0 0 0.25rem 0' }}>{profile.full_name || profile.username}</h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{profile.username}</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--primary-color)', marginTop: '0.5rem' }}>Petugas Lapangan</p>
           </div>
 
 
@@ -93,7 +94,7 @@ export default function AdminProfile() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Email Utama</label>
-                  <input className="form-input" type="email" value={profile.email || ''} onChange={e => setProfile({...profile, email: e.target.value})} placeholder="admin@example.com" />
+                  <input className="form-input" type="email" value={profile.email || ''} onChange={e => setProfile({...profile, email: e.target.value})} placeholder="petugas@example.com" />
                 </div>
               </div>
 

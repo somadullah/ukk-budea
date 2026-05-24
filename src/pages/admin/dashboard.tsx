@@ -19,6 +19,7 @@ export default function AdminDashboard() {
     alat: 0, 
     pinjam: 0, 
     requests: 0,
+    totalDenda: 0,
     chartData: [] as {name: string, value: number}[],
     satisfaction: 0
   });
@@ -47,10 +48,10 @@ export default function AdminDashboard() {
   }, []);
 
   const topCards = [
-    { title: 'Total Users', value: stats.users, trend: '+12.5%', color: 'var(--primary-color)' },
-    { title: 'Koleksi Alat', value: stats.alat, trend: '+5.2%', color: '#a855f7' },
-    { title: 'Sedang Dipinjam', value: stats.pinjam, trend: '-2.1%', color: '#f59e0b' },
-    { title: 'Permintaan Baru', value: stats.requests, trend: 'Total', color: '#ef4444' },
+    { title: 'Total Users', value: stats.users, trend: '+12.5%', color: 'var(--primary-color)', icon: '👥' },
+    { title: 'Koleksi Alat', value: stats.alat, trend: '+5.2%', color: '#a855f7', icon: '🔧' },
+    { title: 'Sedang Dipinjam', value: stats.pinjam, trend: '-2.1%', color: '#f59e0b', icon: '📦' },
+    { title: 'Permintaan Baru', value: stats.requests, trend: 'Total', color: '#ef4444', icon: '🔔' },
   ];
 
 
@@ -73,18 +74,37 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top Cards Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
           {topCards.map((card, i) => (
-            <div key={i} className="glass-card card-premium" style={{ padding: '1.5rem' }}>
-              <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>{card.title}</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <h2 style={{ fontSize: '2.25rem', fontWeight: 800, margin: 0 }}>{loading ? '...' : card.value.toLocaleString()}</h2>
-                <span style={{ fontSize: '0.75rem', color: card.trend.startsWith('+') ? 'var(--success)' : 'var(--text-muted)', fontWeight: 600, marginBottom: '0.5rem' }}>
-                  {card.trend}
-                </span>
+            <div key={i} className="glass-card card-premium" style={{ 
+              padding: '1.25rem', 
+              position: 'relative', 
+              overflow: 'hidden',
+              background: 'var(--card-dark)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{card.title}</p>
+                <span style={{ fontSize: '1.2rem', opacity: 0.8 }}>{card.icon}</span>
               </div>
-              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', marginTop: '1.25rem', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{ width: '60%', height: '100%', background: card.color }}></div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <h2 style={{ 
+                  fontSize: '2rem', 
+                  fontWeight: 800, 
+                  margin: 0,
+                  color: 'white'
+                }}>
+                  {loading ? '...' : (typeof card.value === 'number' ? card.value.toLocaleString() : card.value)}
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.7rem', color: card.trend.startsWith('+') ? 'var(--success)' : 'var(--text-muted)', fontWeight: 600 }}>
+                    {card.trend}
+                  </span>
+                </div>
+              </div>
+              
+              <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.03)', marginTop: '1.5rem', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ width: '70%', height: '100%', background: card.color, boxShadow: `0 0 10px ${card.color}` }}></div>
               </div>
             </div>
           ))}

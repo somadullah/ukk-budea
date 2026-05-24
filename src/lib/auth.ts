@@ -5,7 +5,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'rahasia_negara_super_kuat';
 export interface AuthUser {
   id: number;
   username: string;
-  role: 'admin' | 'petugas' | 'peminjam';
+  role: 'admin' | 'petugas' | 'peminjam' | 'guru';
 }
 
 export function signToken(payload: AuthUser) {

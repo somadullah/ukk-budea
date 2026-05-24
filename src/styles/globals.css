@@ -74,13 +74,27 @@ a {
 }
 
 .glass-card:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  border-color: rgba(79, 70, 229, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
 }
 
 .card-premium {
-  background: var(--card-dark);
+  background: linear-gradient(145deg, rgba(20, 22, 28, 0.9), rgba(10, 11, 14, 0.9));
   border: 1px solid var(--glass-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent);
+  pointer-events: none;
 }
 
 /* Sidebar Navigation */
@@ -329,17 +343,27 @@ th, td {
 }
 
 th {
-  background-color: rgba(0,0,0,0.02);
-  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.03);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-top: 1px solid var(--glass-border);
 }
 
 @media (prefers-color-scheme: dark) {
   th { background-color: rgba(255,255,255,0.02); }
 }
 
-tr:hover {
-  background-color: rgba(0,0,0,0.01);
+tr {
+  transition: var(--transition);
 }
-@media (prefers-color-scheme: dark) {
-  tr:hover { background-color: rgba(255,255,255,0.01); }
+
+tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+td {
+  vertical-align: middle;
 }

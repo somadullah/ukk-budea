@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
+import { formatIDR } from '@/lib/format';
 
 interface Loan {
   id: number;
@@ -23,6 +24,7 @@ export default function MyLoans() {
   const [selectedLoanId, setSelectedLoanId] = useState<number | null>(null);
   const [kondisi, setKondisi] = useState<'baik' | 'rusak' | 'hilang'>('baik');
   const [catatan, setCatatan] = useState('');
+  const [showPaymentGuide, setShowPaymentGuide] = useState(false);
 
   const fetchLoans = async () => {
     setLoading(true);
@@ -64,8 +66,8 @@ export default function MyLoans() {
       } else {
         alert('Gagal mengirim permintaan');
       }
-    } catch {
-      alert('Terjadi kesalahan koneksi');
+    } catch (err: unknown) {
+      alert('Kesalahan jaringan: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setSubmittingId(null);
     }
@@ -136,7 +138,7 @@ export default function MyLoans() {
                           loan.status === 'kembali_diajukan' ? 'var(--primary-color)' :
                           loan.status === 'ditolak' ? 'var(--danger)' : 'var(--primary-color)'
                       }}>
-                        {loan.status === 'kembali_diajukan' ? 'MENUNGGU KONFIRMASI' : loan.status.toUpperCase()}
+                        {loan.status === 'kembali_diajukan' ? 'MENUNGGU KONFIRMASI' : loan.status?.toUpperCase() || 'UNKNOWN'}
                       </div>
                       
                       {loan.status === 'dipinjam' && (
@@ -176,8 +178,15 @@ export default function MyLoans() {
                         <div>
                           <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Denda Terpilih</p>
                           <p style={{ margin: '4px 0 0', fontWeight: 700, color: 'var(--danger)' }}>
-                            Rp{loan.denda.toLocaleString('id-ID')}
+                            {formatIDR(loan.denda)}
                           </p>
+                          <button 
+                            className="btn" 
+                            style={{ padding: '2px 8px', fontSize: '0.65rem', marginTop: '6px', border: '1px solid var(--danger)', color: 'var(--danger)', background: 'transparent' }}
+                            onClick={() => setShowPaymentGuide(true)}
+                          >
+                            💳 Cara Bayar
+                          </button>
                         </div>
                       )}
 
@@ -185,7 +194,7 @@ export default function MyLoans() {
                         <div style={{ gridColumn: '1 / -1' }}>
                           <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Catatan Petugas</p>
                           <p style={{ margin: '4px 0 0', fontSize: '0.85rem', fontStyle: 'italic', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 0.75rem', borderRadius: '8px' }}>
-                            "{loan.catatan}"
+                            &quot;{loan.catatan}&quot;
                           </p>
                         </div>
                       )}
@@ -207,7 +216,7 @@ export default function MyLoans() {
             <form onSubmit={handleReturnRequest}>
               <div className="form-group">
                 <label className="form-label">Kondisi Alat</label>
-                <select className="form-input" value={kondisi} onChange={e => setKondisi(e.target.value as any)}>
+                <select className="form-input" value={kondisi} onChange={e => setKondisi(e.target.value as 'baik' | 'rusak' | 'hilang')}>
                   <option value="baik">✅ Baik</option>
                   <option value="rusak">⚠️ Rusak</option>
                   <option value="hilang">❌ Hilang</option>
@@ -230,6 +239,39 @@ export default function MyLoans() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {showPaymentGuide && (
+        <div className="modal-overlay" onClick={() => setShowPaymentGuide(false)}>
+          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', padding: '2rem', margin: 'auto' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ marginTop: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontSize: '1.5rem' }}>💳</span> Instruksi Pembayaran Denda
+            </h3>
+            
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ margin: '0 0 8px', fontWeight: 700, color: 'var(--primary-color)', fontSize: '0.9rem' }}>1. Bayar Tunai (Cash)</p>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Datangi meja petugas di Gedung Sarana Prasarana dan tunjukkan nomor Invoice atau nama Anda.</p>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ margin: '0 0 8px', fontWeight: 700, color: 'var(--primary-color)', fontSize: '0.9rem' }}>2. Transfer Bank / VA</p>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Bank: <strong>BANK MANDIRI</strong><br/>
+                  No. Rek: <strong>123-00-987654-321</strong><br/>
+                  A/N: <strong>KOPERASI SEHAT PROJECT</strong>
+                </p>
+                <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: 'var(--warning)', fontStyle: 'italic' }}>*Sertakan nomor Invoice di berita transfer.</p>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ margin: '0 0 8px', fontWeight: 700, color: 'var(--primary-color)', fontSize: '0.9rem' }}>3. Konfirmasi</p>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Setelah membayar, kirimkan bukti transfer ke WhatsApp Petugas untuk pembersihan status denda.</p>
+              </div>
+            </div>
+
+            <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem' }} onClick={() => setShowPaymentGuide(false)}>Saya Mengerti</button>
           </div>
         </div>
       )}

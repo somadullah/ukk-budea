@@ -6,7 +6,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const token = req.cookies.auth_token;
   if (!token) return res.status(401).json({ message: 'Unauthorized' });
   const user = verifyToken(token);
-  if (!user || user.role !== 'petugas') return res.status(403).json({ message: 'Forbidden' });
+  
+  // Allow both petugas and admin
+  if (!user || (user.role !== 'petugas' && user.role !== 'admin')) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
 
   if (req.method === 'GET') {
     try {
@@ -19,8 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         WHERE p.status = 'menunggu'
       `);
       return res.status(200).json(rows);
-    } catch {
-      return res.status(500).json({ message: 'Database error' });
+    } catch (error) {
+      console.error('Fetch persetujuan error:', error);
+      return res.status(500).json({ message: 'Database error', details: error });
     }
   }
 
@@ -39,12 +44,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Log activity
       await pool.query(
         'INSERT INTO log_aktifitas (user_id, aksi) VALUES (?, ?)',
-        [user.id, `Petugas ${newStatus} peminjaman ID ${peminjaman_id}`]
+        [user.id, `${user.role.toUpperCase()} ${newStatus} peminjaman ID ${peminjaman_id}`]
       );
 
       return res.status(200).json({ message: `Peminjaman ${newStatus}` });
-    } catch {
-      return res.status(500).json({ message: 'Database error' });
+    } catch (error) {
+      console.error('Action persetujuan error:', error);
+      return res.status(500).json({ message: 'Database error', details: error });
     }
   }
 

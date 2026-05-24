@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import pool from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
+import { RowDataPacket } from 'mysql2';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const token = req.cookies.auth_token;
@@ -18,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       // Ensure the loan belongs to the user and is currently 'dipinjam'
-      const [loan]: any = await pool.query(
+      const [loan] = await pool.query<RowDataPacket[]>(
         'SELECT id, status FROM peminjaman WHERE id = ? AND user_id = ?',
         [peminjaman_id, user.id]
       );
