@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const [rows] = await pool.query(`
-        SELECT l.id, u.username, l.aksi, l.tanggal 
+        SELECT l.id, u.username, u.role, l.aksi, l.tanggal 
         FROM log_aktifitas l 
         JOIN users u ON l.user_id = u.id
         ORDER BY l.tanggal DESC

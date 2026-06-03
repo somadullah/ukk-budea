@@ -79,10 +79,6 @@ export default function Layout({ children, title = 'Aplikasi Peminjaman Alat', a
           {children}
         </div>
       </main>
-      
-      <footer style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-        &copy; {new Date().getFullYear()} Aplikasi Peminjaman Alat
-      </footer>
     </>
   );
 }
